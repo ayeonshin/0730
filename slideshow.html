@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            background-color: cornsilk;
+            min-width: 1200px;
+        }
+
+        .slideshow {
+            background-color: rgba(0, 0, 0, 0.5);
+            height: 465px;
+            min-width: 960px;
+            position: relative;
+        }
+
+        .slideshow-slides {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+
+        }
+
+        .slideshow-slides .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            overflow: hidden;
+        }
+
+        .slideshow-slides .slide img {
+            //opacity: 0.5;
+            position: absolute;
+            margin-left: -800px;
+            left: 50%;
+
+        }
+
+        .slideshow-nav a,
+        .slideshow-indicator a {
+            overflow: hidden;
+        }
+
+
+        .slideshow-nav a:before,
+        .slideshow-indicator a:before {
+            content: url(sprites.png);
+            display: inline-block;
+            font-size: 0;
+            line-height: 0;
+        }
+
+        .slideshow-nav a {
+            position: absolute;
+            width: 72px;
+            height: 72px;
+            top: 50%;
+            left: 50%;
+            margin-top: -36px;
+        }
+
+        .slideshow-nav a.prev {
+            margin-left: -480px;
+        }
+
+        .slideshow-nav a.next {
+            margin-left: 480px;
+        }
+
+        .slideshow-nav a.prev:before {
+            margin-top: -20px;
+        }
+
+        .slideshow-nav a.next:before {
+            margin-top: -20px;
+            margin-left: -80px;
+        }
+
+        .slideshow-indicator {
+            position: absolute;
+            height: 16px;
+            left: 0;
+            right: 0;
+            bottom: 30px;
+            text-align: center;
+
+        }
+
+        .slideshow-indicator a {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-left: 3px;
+            margin-right: 3px;
+        }
+
+        .slideshow-indicator a::before {
+            margin-left: -110px;
+        }
+
+        .slideshow-indicator a.active {
+            cursor: default;
+        }
+
+        .slideshow-indicator a.active:before {
+            margin-left: -130px;
+        }
+
+        .slideshow-nav a.disabled {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slideshow">
+        <div class="slideshow-slides">
+            <a href="#" class="slide"><img src="./slide-1.jpg"></a>
+            <a href="#" class="slide"><img src="./slide-2.jpg"></a>
+            <a href="#" class="slide"><img src="./slide-3.jpg"></a>
+            <a href="#" class="slide"><img src="./slide-4.jpg"></a>
+
+        </div>
+        <div class="slideshow-nav">
+            <a href="#" class="prev">Prev</a>
+            <a href="#" class="next">Next</a>
+        </div>
+        <div class="slideshow-indicator"></div>
+    </div>
+    <script src="jquery-1.11.3.min.js"></script>
+    <script src="jquery-ui-1.10.3.custom.min.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            $('.slideshow').each(function () {
+                var $container = $(this),
+                    $slideGroup = $container.find('.slideshow-slides'),
+                    $slides = $slideGroup.find('.slide'),
+                    $nav = $container.find('.slideshow-nav'),
+                    $indicator = $container.find('.slideshow-indicator'),
+                    slideCount = $slides.length,
+                    indicatorHTML = "",
+                    duration = 1000,
+                    currentIndex = 0,
+                    easing = 'easeInOutExpo',
+                    interval = 4500,
+                    timer;
+
+                //var i=1;
+                $slides.each(function (i) {
+                    $(this).css({
+                        left: 100 * i + '%'
+                    });
+                    indicatorHTML += '<a href="#">' + (i + 1) + '</a>';
+                }); // 그림위치, 인디게이터에 앵커생성
+                $indicator.html(indicatorHTML); // 그림아래 점 찍는거
+
+                function goToSlide(index) {
+                    // 슬라이드 그룹을 대상 위치에 맞게 이동
+                    $slideGroup.animate({
+                        left: -100 * index + '%'
+                    }, duration, easing);
+                    // 현재 슬라이드의 인덱스를 덮어쓰기
+                    currentIndex = index;
+                    // 탐색 및 표시 상태를 업데이트
+                    updateNav();
+                }
+
+
+                function updateNav() {
+                    var $navPrev = $nav.find('.prev'),
+                        $navNext = $nav.find('.next');
+
+                    if (currentIndex === 0) {
+                        $navPrev.addClass('disabled')
+                    } else {
+                        $navPrev.removeClass('disabled');
+                    } //만약 첫번째 슬라이드라면 왼쪽 꺽쇠를 안 보이게
+
+                    if (currentIndex === slideCount - 1) {
+                        $navNext.addClass('disabled');
+                    } else {
+                        $navNext.removeClass('disabled');
+                    } //만약 마지막 슬라이드라면 오른쪽꺽쇠를 안 보이게
+
+                    $indicator.find('a').removeClass('active')
+                        .eq(currentIndex).addClass('active');
+
+                }
+
+                function startTimer() {
+                    timer = setInterval(function () {
+                        var nextIndex = (currentIndex + 1) % slideCount;
+                        goToSlide(nextIndex);
+                    }, interval, easing);
+                }
+
+                function stopTimer() {
+                    clearInterval(timer);
+                }
+
+                $nav.on('click', 'a', function (event) {
+                    event.preventDefault();
+                    if ($(this).hasClass('prev')) {
+                        goToSlide(currentIndex - 1);
+                    } else {
+                        goToSlide(currentIndex + 1);
+                    }
+                })
+
+                $indicator.on('click', 'a', function (event) {
+                    event.preventDefault();
+                    if (!$(this).hasClass('active')) {
+                        goToSlide($(this).index())
+                    }
+                }); // indicator
+
+                $container.on({
+                    mouseenter: stopTimer,
+                    mouseleave: startTimer
+                });
+                goToSlide(currentIndex);
+                startTimer();
+                // })
+
+            }); // .slideshow 끝
+        });
+    </script>
+</body>
+
+</html>

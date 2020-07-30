@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>on() 이벤트 핸들러를 사용할 수 있고 여러개 사용가능 하다.</h2>
+    <h2>off() 이벤트 핸들러를 제거한다. </h2>
+    <button id="onevent">Click Me!</button>
+    <button id="offevent">Click Me!</button>
+    <script src="jquery-1.11.3.min.js"></script>
+    <script src="jquery-ui-1.10.3.custom.min.js"></script>
+    <script>
+        $('#onevent').on('click mouseenter',function(){
+            alert('okay');
+        });
+
+        $('#offevent').on('click',function(){
+            $('#onevent').off('mouseenter');
+        })
+    </script>
+</body>
+</html>
